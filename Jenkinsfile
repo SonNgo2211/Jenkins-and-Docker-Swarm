@@ -30,7 +30,7 @@ pipeline {
             steps {
                 script {
                     // Thực hiện lệnh Docker Swarm Join trên mỗi node worker
-                    sh "docker swarm join --token $(cat worker-token.txt) ${masterAddress}:2377"
+                    sh "docker swarm join --token \$(cat worker-token.txt) ${masterAddress}:2377"
                 }
             }
         }
