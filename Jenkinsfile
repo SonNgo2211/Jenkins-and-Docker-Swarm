@@ -5,8 +5,11 @@ pipeline {
         stage('Deploy Swarm Master') {
             steps {
                 script {
+                    // Địa chỉ IP của node master
+                    def masterAddress = '10.1.38.190'
+                    
                     // Thực hiện lệnh Docker Swarm Init để khởi tạo node master
-                    sh "docker swarm init"
+                    sh "docker swarm init --advertise-addr ${masterAddress}"
                 }
             }
         }
@@ -26,8 +29,8 @@ pipeline {
         stage('Deploy Swarm Workers') {
             steps {
                 script {
-                    // Thực hiện lệnh Docker Swarm Join trên mỗi node trong cluster
-                    sh "docker swarm join --token $(cat worker-token.txt) $(docker info --format '{{.Swarm.NodeAddr}}'):2377"
+                    // Thực hiện lệnh Docker Swarm Join trên mỗi node worker
+                    sh "docker swarm join --token $(cat worker-token.txt) ${masterAddress}:2377"
                 }
             }
         }
