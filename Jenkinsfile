@@ -2,35 +2,32 @@ pipeline {
     agent any
 
     stages {
-        stage('Deploy Swarm Master') {
-            steps {
-                script {
-                    // Địa chỉ IP của node master
-                    def masterAddress = '10.1.38.190'
-                    
-                    // Thực hiện lệnh Docker Swarm Init để khởi tạo node master
-                    sh "docker swarm init --advertise-addr ${masterAddress} --listen-addr 0.0.0.0"
-                }
-            }
-        }
-
-        stage('Get Worker Token') {
-            steps {
-                script {
-                    // Lấy thông tin token cho worker từ node master
-                    def workerToken = sh(script: "docker swarm join-token -q worker", returnStdout: true).trim()
-                    
-                    // Lưu thông tin token vào file để sử dụng sau này
-                    writeFile file: 'worker-token.txt', text: "${workerToken}"
-                }
-            }
-        }
-
         stage('Deploy Swarm Workers') {
             steps {
                 script {
-                    // Thực hiện lệnh Docker Swarm Join trên mỗi node worker
-                    sh "docker swarm join --token \$(cat worker-token.txt) ${masterAddress}:2377"
+                    // Lấy danh sách các host slaves của Jenkins
+                    def slaves = [:]
+                    for (node in Jenkins.instance.nodes) {
+                        if (node.computer.isOnline() && node.slaves) {
+                            slaves[node.slaves] = {
+                                // Thực hiện lệnh Docker Swarm Join trên mỗi host slave
+                                sh "ssh ${node.slaves.remoteFS} docker swarm join --token SWMTKN-1-67w6ac8xgln6h6wjvgicpd0bctph9w89dsvjjppz3nipyu5xdn-darph4y5xqdjwyo9q21l2suen 10.1.38.190:2377"
+                            }
+                        }
+                    }
+                    parallel slaves
+                }
+            }
+        }
+
+        stage('Deploy Services') {
+            steps {
+                script {
+                    // Deploy nginx service
+                    sh "docker service create --name nginx --publish published=80,target=80 nginx"
+
+                    // Deploy DVWA service
+                    sh "docker service create --name dvwa --publish published=8080,target=80 vulnerables/web-dvwa"
                 }
             }
         }
