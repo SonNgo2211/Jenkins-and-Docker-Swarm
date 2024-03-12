@@ -7,25 +7,12 @@ pipeline {
                 script {
     
                     for (node in Jenkins.instance.nodes) {
-                        if (node.computer.isOnline() && node.computer.name != 'master') {
-                            // Sử dụng lệnh hostname để lấy danh sách các địa chỉ IP của node
-                            def command = "ssh ${node.getDisplayName()} hostname -I"
-                            def process = command.execute()
-                            process.waitFor()
+                        if (node.computer.isOnline()) {
+                     // Thực hiện lệnh SSH để lấy địa chỉ IP của node
+                            def ipAddress = sh(script: "ssh ${node.getDisplayName()} hostname -I", returnStdout: true).trim()
 
-                            if (process.exitValue() == 0) {
-                            // Lấy địa chỉ IP từ kết quả trả về
-                            def ipListAddress = process.text.trim()
-                            def ipList = "echo \"${ipListAddress}\""
-
-                            // Chọn một địa chỉ IP cụ thể từ danh sách bằng lệnh awk
-                            def ipAddress = sh(script: "${ipList} | awk '{print \$1}'", returnStdout: true).trim()
-
-                            // Sử dụng địa chỉ IP để tham gia node vào cluster Swarm
-                            sh "ssh ${ipAddress} docker swarm join --token SWMTKN-1-67w6ac8xgln6h6wjvgicpd0bctph9w89dsvjjppz3nipyu5xdn-darph4y5xqdjwyo9q21l2suen 10.1.38.190:2377"
-                        } else {
-                            println "Không thể kết nối với node ${node.getDisplayName()}"
-                        }
+                            // In ra địa chỉ IP của node
+                            echo "IP Address of ${node.getDisplayName()}: ${ipAddress}"
                         }
                     }
                 }
