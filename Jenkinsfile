@@ -15,9 +15,10 @@ pipeline {
 
                             // Lấy địa chỉ IP từ kết quả trả về
                             def ipListAddress = process.text.trim()
+                            def ipList = "echo \"${ipListAddress}\""
 
                             // Chọn một địa chỉ IP cụ thể từ danh sách bằng lệnh awk
-                            def ipAddress = sh(script: "echo \"${ipAddress}\" | awk '{print \\\\$1}'", returnStdout: true).trim()
+                            def ipAddress = sh(script: "${ipList} | awk '{print \$1}'", returnStdout: true).trim()
 
                             // Sử dụng địa chỉ IP để tham gia node vào cluster Swarm
                             sh "ssh ${ipAddress} docker swarm join --token SWMTKN-1-67w6ac8xgln6h6wjvgicpd0bctph9w89dsvjjppz3nipyu5xdn-darph4y5xqdjwyo9q21l2suen 10.1.38.190:2377"
