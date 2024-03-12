@@ -6,7 +6,7 @@ pipeline {
             steps {
                 script {
                     // Địa chỉ IP của node master
-                    def masterAddress = '10.1.38.190'
+                    def masterAddress = '10.1.36.161'
                     
                     // Thực hiện lệnh Docker Swarm Init để khởi tạo node master
                     sh "docker swarm init --advertise-addr ${masterAddress}"
