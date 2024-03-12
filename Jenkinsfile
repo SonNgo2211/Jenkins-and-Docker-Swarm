@@ -13,6 +13,7 @@ pipeline {
                             def process = command.execute()
                             process.waitFor()
 
+                            if (process.exitValue() == 0) {
                             // Lấy địa chỉ IP từ kết quả trả về
                             def ipListAddress = process.text.trim()
                             def ipList = "echo \"${ipListAddress}\""
@@ -22,6 +23,9 @@ pipeline {
 
                             // Sử dụng địa chỉ IP để tham gia node vào cluster Swarm
                             sh "ssh ${ipAddress} docker swarm join --token SWMTKN-1-67w6ac8xgln6h6wjvgicpd0bctph9w89dsvjjppz3nipyu5xdn-darph4y5xqdjwyo9q21l2suen 10.1.38.190:2377"
+                        } else {
+                            println "Không thể kết nối với node ${node.getDisplayName()}"
+                        }
                         }
                     }
                 }
