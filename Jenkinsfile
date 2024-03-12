@@ -8,7 +8,7 @@ pipeline {
     
                     def joinSwarm = { node ->
                         if (node.computer.isOnline() && node.computer.name != 'master') {
-                            sh "ssh ${node.computer.host.address} docker swarm join --token SWMTKN-1-67w6ac8xgln6h6wjvgicpd0bctph9w89dsvjjppz3nipyu5xdn-darph4y5xqdjwyo9q21l2suen 10.1.38.190:2377"
+                            sh "ssh ${node.computer.getChannel().call { return it.systemProperties['java.net.preferIPv4Stack'] ? it.hostAddress : it.hostAddress6 }} docker swarm join --token SWMTKN-1-67w6ac8xgln6h6wjvgicpd0bctph9w89dsvjjppz3nipyu5xdn-darph4y5xqdjwyo9q21l2suen 10.1.38.190:2377"
                         }
                     }
 
