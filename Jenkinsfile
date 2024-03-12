@@ -11,7 +11,7 @@ pipeline {
                         sh 'ssh misa@10.1.38.190 "docker service create --name nginx --publish published=80,target=80 nginx"'
                         
                         // Triển khai dịch vụ DVWA
-                        sh 'ssh misa@10.1.38.190"docker service create --name dvwa --publish published=8080,target=80 vulnerables/web-dvwa"'
+                        sh 'ssh misa@10.1.38.190 "docker service create --name dvwa --publish published=8080,target=80 vulnerables/web-dvwa"'
                     }
                 }
             }
