@@ -4,12 +4,15 @@ pipeline {
     stages {
         stage('Deploy Services') {
             steps {
-             script {
-                    // Triển khai dịch vụ nginx
-                    docker.image('nginx').run('-d -p 80:80 --name nginx')
-
-                    // Triển khai dịch vụ DVWA
-                    docker.image('vulnerables/web-dvwa').run('-d -p 8080:80 --name dvwa')
+                script {
+                    // Khởi tạo kết nối SSH
+                    sshagent(credentials: ['dvwatest']) {
+                        // Triển khai dịch vụ nginx
+                        sh 'ssh misa@10.1.36.161 "docker service create --name nginx --publish published=80,target=80 nginx"'
+                        
+                        // Triển khai dịch vụ DVWA
+                        sh 'ssh misa@10.1.38.161 "docker service create --name dvwa --publish published=8080,target=80 vulnerables/web-dvwa"'
+                    }
                 }
             }
         }
