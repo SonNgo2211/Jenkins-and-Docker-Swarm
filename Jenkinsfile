@@ -5,17 +5,16 @@ pipeline {
         stage('Deploy Swarm Workers') {
             steps {
                 script {
-                    // Lấy danh sách các host slaves của Jenkins
-                    def slaves = [:]
-                    for (node in Jenkins.instance.nodes) {
+    
+                    def joinSwarm = { node ->
                         if (node.computer.isOnline() && node.computer.name != 'master') {
-                            slaves[node.computer.name] = {
-                                // Thực hiện lệnh Docker Swarm Join trên mỗi host slave
-                                sh "ssh ${node.computer.name} docker swarm join --token ${workerToken} <master-node-ip>:2377"
-                            }
+                            sh "ssh ${node.computer.name} docker swarm join --token ${workerToken} <master-node-ip>:2377"
                         }
                     }
-                    parallel slaves
+
+                    Jenkins.instance.nodes.each { node ->
+                        parallel joinSwarm(node)
+                    }
                 }
             }
         }
