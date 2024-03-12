@@ -8,10 +8,10 @@ pipeline {
                     // Lấy danh sách các host slaves của Jenkins
                     def slaves = [:]
                     for (node in Jenkins.instance.nodes) {
-                        if (node.computer.isOnline() && node.slaves) {
-                            slaves[node.slaves] = {
+                        if (node.computer.isOnline() && node.computer.name != 'master') {
+                            slaves[node.computer.name] = {
                                 // Thực hiện lệnh Docker Swarm Join trên mỗi host slave
-                                sh "ssh ${node.slaves.remoteFS} docker swarm join --token SWMTKN-1-67w6ac8xgln6h6wjvgicpd0bctph9w89dsvjjppz3nipyu5xdn-darph4y5xqdjwyo9q21l2suen 10.1.38.190:2377"
+                                sh "ssh ${node.computer.name} docker swarm join --token ${workerToken} <master-node-ip>:2377"
                             }
                         }
                     }
