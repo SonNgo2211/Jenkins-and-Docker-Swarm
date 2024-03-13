@@ -47,7 +47,7 @@ pipeline {
                         sh 'ssh -o StrictHostKeyChecking=no whackers@192.168.1.217 "docker service create --name dvwa_db --replicas 1 --network web-net --publish published=3306,target=3306 whackers/dvwa_db:latest"'
                         
                         // Triển khai dịch vụ DVWA web
-                        sh 'ssh -o StrictHostKeyChecking=no whackers@192.168.1.217 "docker service create --name dvwa_web  --replicas 1 --network web-net --publish published=80,target=80 whackers/dvwa_web:latest"'
+                        sh 'ssh -o StrictHostKeyChecking=no whackers@192.168.1.217 "docker service create --name dvwa_web  --replicas 1 --network web-net whackers/dvwa_web:latest"'
 
                         // Triển khai dịch vụ nginx
                         sh 'ssh -o StrictHostKeyChecking=no whackers@192.168.1.217 "docker service create --name nginx_proxy --replicas 1 --network web-net --publish published=80,target=4321 whackers/nginx-custom:latest"'
