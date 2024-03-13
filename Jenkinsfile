@@ -44,30 +44,30 @@ pipeline {
                     }
                     
                     def isServiceExists = {serviceName ->
-                        return sshExecute("docker service ls --format '{{.Name}}' | grep '^${serviceName}\$'", returnStatus: true) == 0
+                        return sshExecute("docker service ls --format '{{.Name}}' | grep '^${serviceName}\$'") == 0
                     }
 
                     def updateService = {serviceName, image, sport, dport, replicas ->
                         sshExecute("docker service update --image ${image} --publish ${sport}:${dport} --replicas ${replicas} ${serviceName}")
                     }
 
-                    def createService = {serviceName, image, sport, dport, replicas ->
-                        sshExecute("docker service create --name ${serviceName} --publish ${sport}:${dport} --replicas ${replicas} ${image}")
+                    def createService = {serviceName, image, sport, dport, replicas, network ->
+                        sshExecute("docker service create --name ${serviceName} --network ${network} --publish ${sport}:${dport} --replicas ${replicas} ${image}")
                     }
 
-                    def sshExecuteService = {serviceName, image, sport, dport, replicas ->
+                    def sshExecuteService = {serviceName, image, sport, dport, replicas, network ->
                         if (isServiceExists(serviceName)) {
                             updateService(serviceName, image, sport, dport, replicas)
                         } else {
-                            createService(serviceName, image, sport, dport, replicas)
+                            createService(serviceName, image, sport, dport, replicas, network)
                         }
                     }
 
                     sshagent(credentials: ['masterNode']) {
 
-                        sshExecuteService('dvwa_db', 'whackers/dvwa_db:latest', '3306', '3306', '2')
-                        sshExecuteService('dvwa_web', 'whackers/dvwa_web:latest', '8080', '80', '2')
-                        sshExecuteService('nginx', 'whackers/nginx-custom:latest', '80', '80', '2')
+                        sshExecuteService('dvwa_db', 'whackers/dvwa_db:latest', '3306', '3306', '2', 'web-net')
+                        sshExecuteService('dvwa_web', 'whackers/dvwa_web:latest', '8080', '80', '2', 'web-net')
+                        sshExecuteService('nginx', 'whackers/nginx-custom:latest', '80', '80', '2', 'web-net')
 
                     }
 
