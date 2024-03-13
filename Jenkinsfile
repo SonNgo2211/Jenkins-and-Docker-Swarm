@@ -38,16 +38,24 @@ pipeline {
         stage('Deploy Services') {
             steps {
                 script {
-                    // Khởi tạo kết nối SSH
-                    sshagent(credentials: ['masterNode']) {
-
-                        sshExecuteService('dvwa_db', 'whackers/dvwa_db:latest', '3306', '3306', '2')
-                        sshExecuteService('dvwa_web', 'whackers/dvwa_web:latest', '8080', '80', '2')
-                        sshExecuteService('nginx', 'whackers/nginx-custom:latest', '80', '80', '2')
-
+                    
+                    def isServiceExists = {serviceName ->
+                        return sshExecute("docker service ls --format '{{.Name}}' | grep '^${serviceName}\$'", returnStatus: true) == 0
                     }
 
-                    def sshExecuteService(serviceName, image, sport, dport, replicas) {
+                    def updateService = {serviceName, image, sport, dport ->
+                        sshExecute("docker service update --image ${image} --publish ${sport}:${dport} --replicas ${replicas} ${serviceName}")
+                    }
+
+                    def createService = {serviceName, image, sport, dport ->
+                        sshExecute("docker service create --name ${serviceName} --publish ${sport}:${dport} --replicas ${replicas} ${image}")
+                    }
+
+                    def sshExecute = {command ->
+                        return sh(script: "ssh -o StrictHostKeyChecking=no whackers@192.168.1.217 '${command}'", returnStatus: true)
+                    }
+
+                    def sshExecuteService = {serviceName, image, sport, dport, replicas ->
                         if (isServiceExists(serviceName)) {
                             updateService(serviceName, image, sport, dport, replicas)
                         } else {
@@ -55,21 +63,14 @@ pipeline {
                         }
                     }
 
-                    def isServiceExists(serviceName) {
-                        return sshExecute("docker service ls --format '{{.Name}}' | grep '^${serviceName}\$'", returnStatus: true) == 0
-                    }
+                    sshagent(credentials: ['masterNode']) {
 
-                    def updateService(serviceName, image, sport, dport) {
-                        sshExecute("docker service update --image ${image} --publish ${sport}:${dport} --replicas ${replicas} ${serviceName}")
-                    }
+                        sshExecuteService('dvwa_db', 'whackers/dvwa_db:latest', '3306', '3306', '2')
+                        sshExecuteService('dvwa_web', 'whackers/dvwa_web:latest', '8080', '80', '2')
+                        sshExecuteService('nginx', 'whackers/nginx-custom:latest', '80', '80', '2')
 
-                    def createService(serviceName, image, sport, dport) {
-                        sshExecute("docker service create --name ${serviceName} --publish ${sport}:${dport} --replicas ${replicas} ${image}")
                     }
-
-                    def sshExecute(command) {
-                        return sh(script: "ssh -o StrictHostKeyChecking=no whackers@192.168.1.217 '${command}'", returnStatus: true)
-                    }
+                    
                 }
             }
         }
