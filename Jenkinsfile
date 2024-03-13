@@ -66,8 +66,8 @@ pipeline {
                     sshagent(credentials: ['masterNode']) {
 
                         sshExecuteService('dvwa_db', 'whackers/dvwa_db:latest', '3306', '3306', '1', 'web-net')
-                        sshExecuteService('dvwa_web', 'whackers/dvwa_web:latest', '8080', '80', '1', 'web-net')
-                        sshExecuteService('nginx', 'whackers/nginx-custom:latest', '80', '4321', '1', 'web-net')
+                        sshExecuteService('dvwa_web', 'whackers/dvwa_web:latest', '8000', '80', '1', 'web-net')
+                        sshExecuteService('nginx', 'whackers/nginx-custom:latest', '4321', '4321', '1', 'web-net')
 
                     }
 
