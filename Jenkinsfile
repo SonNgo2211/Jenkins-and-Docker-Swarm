@@ -47,11 +47,11 @@ pipeline {
                         return sshExecute("docker service ls --format '{{.Name}}' | grep '^${serviceName}\$'", returnStatus: true) == 0
                     }
 
-                    def updateService = {serviceName, image, sport, dport ->
+                    def updateService = {serviceName, image, sport, dport, replicas ->
                         sshExecute("docker service update --image ${image} --publish ${sport}:${dport} --replicas ${replicas} ${serviceName}")
                     }
 
-                    def createService = {serviceName, image, sport, dport ->
+                    def createService = {serviceName, image, sport, dport, replicas ->
                         sshExecute("docker service create --name ${serviceName} --publish ${sport}:${dport} --replicas ${replicas} ${image}")
                     }
 
