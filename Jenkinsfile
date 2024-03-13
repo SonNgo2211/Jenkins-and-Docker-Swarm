@@ -47,8 +47,8 @@ pipeline {
                         return sshExecute("docker service ls --format '{{.Name}}' | grep '^${serviceName}\$'") == 0
                     }
 
-                    def updateService = {serviceName, image, sport, dport, replicas ->
-                        sshExecute("docker service update --image ${image} --publish ${sport}:${dport} --replicas ${replicas} ${serviceName}")
+                    def updateService = {serviceName, image, replicas ->
+                        sshExecute("docker service update --image ${image} --replicas ${replicas} ${serviceName}")
                     }
 
                     def createService = {serviceName, image, sport, dport, replicas, network ->
@@ -57,7 +57,7 @@ pipeline {
 
                     def sshExecuteService = {serviceName, image, sport, dport, replicas, network ->
                         if (isServiceExists(serviceName)) {
-                            updateService(serviceName, image, sport, dport, replicas)
+                            updateService(serviceName, image, replicas)
                         } else {
                             createService(serviceName, image, sport, dport, replicas, network)
                         }
@@ -67,7 +67,7 @@ pipeline {
 
                         sshExecuteService('dvwa_db', 'whackers/dvwa_db:latest', '3306', '3306', '2', 'web-net')
                         sshExecuteService('dvwa_web', 'whackers/dvwa_web:latest', '8080', '80', '2', 'web-net')
-                        sshExecuteService('nginx', 'whackers/nginx-custom:latest', '80', '80', '2', 'web-net')
+                        sshExecuteService('nginx', 'whackers/nginx-custom:latest', '80', '4321', '2', 'web-net')
 
                     }
 
