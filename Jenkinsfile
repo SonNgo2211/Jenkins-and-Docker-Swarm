@@ -38,6 +38,10 @@ pipeline {
         stage('Deploy Services') {
             steps {
                 script {
+
+                    def sshExecute = {command ->
+                        return sh(script: "ssh -o StrictHostKeyChecking=no whackers@192.168.1.217 '${command}'", returnStatus: true)
+                    }
                     
                     def isServiceExists = {serviceName ->
                         return sshExecute("docker service ls --format '{{.Name}}' | grep '^${serviceName}\$'", returnStatus: true) == 0
@@ -49,10 +53,6 @@ pipeline {
 
                     def createService = {serviceName, image, sport, dport ->
                         sshExecute("docker service create --name ${serviceName} --publish ${sport}:${dport} --replicas ${replicas} ${image}")
-                    }
-
-                    def sshExecute = {command ->
-                        return sh(script: "ssh -o StrictHostKeyChecking=no whackers@192.168.1.217 '${command}'", returnStatus: true)
                     }
 
                     def sshExecuteService = {serviceName, image, sport, dport, replicas ->
@@ -70,7 +70,7 @@ pipeline {
                         sshExecuteService('nginx', 'whackers/nginx-custom:latest', '80', '80', '2')
 
                     }
-                    
+
                 }
             }
         }
