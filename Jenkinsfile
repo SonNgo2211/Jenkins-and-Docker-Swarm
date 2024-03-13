@@ -3,37 +3,37 @@ pipeline {
 
     stages {
 
-        stage('Build and Push Image') {
-            steps {
-                script {
+        // stage('Build and Push Image') {
+        //     steps {
+        //         script {
 
-                    // Build and push dvwa_db image
-                    dir('dvwa_db') {
-                        docker.build('whackerS/dvwa_db:latest')
-                        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub_id') {
-                        docker.image('whackerS/dvwa_db:latest').push()
-                        }
-                    }
+        //             // Build and push dvwa_db image
+        //             dir('dvwa_db') {
+        //                 docker.build('whackerS/dvwa_db:latest')
+        //                 docker.withRegistry('https://registry.hub.docker.com', 'dockerhub_id') {
+        //                 docker.image('whackerS/dvwa_db:latest').push()
+        //                 }
+        //             }
 
-                    // Build and push dvwa_web image
-                    dir('dvwa_web') {
-                        docker.build('whackerS/dvwa_web:latest')
-                        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub_id') {
-                        docker.image('whackerS/dvwa_web:latest').push()
-                        }
-                    }
+        //             // Build and push dvwa_web image
+        //             dir('dvwa_web') {
+        //                 docker.build('whackerS/dvwa_web:latest')
+        //                 docker.withRegistry('https://registry.hub.docker.com', 'dockerhub_id') {
+        //                 docker.image('whackerS/dvwa_web:latest').push()
+        //                 }
+        //             }
 
-                    // Build and push nginx image
-                    dir('nginx') {
-                        docker.build('whackerS/nginx-custom:latest')
-                        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub_id') {
-                        docker.image('whackerS/nginx-custom:latest').push()
-                        }
-                    }
-                }
+        //             // Build and push nginx image
+        //             dir('nginx') {
+        //                 docker.build('whackerS/nginx-custom:latest')
+        //                 docker.withRegistry('https://registry.hub.docker.com', 'dockerhub_id') {
+        //                 docker.image('whackerS/nginx-custom:latest').push()
+        //                 }
+        //             }
+        //         }
 
-            }
-        }
+        //     }
+        // }
 
         stage('Deploy Services') {
             steps {
