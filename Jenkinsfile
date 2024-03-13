@@ -2,6 +2,28 @@ pipeline {
     agent any
 
     stages {
+
+        stage('Build and Push Image') {
+            steps {
+                // Build and push nginx image
+                dir('nginx') {
+                    docker.build('whackerS/nginx-custom:latest')
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub_id') {
+                    docker.image('whackerS/nginx-custom:latest').push()
+                    }
+                }
+
+                // Build and push dvwa image
+                dir('dvwa') {
+                    docker.build('your-docker-hub-username/dvwa-image:latest')
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub_id') {
+                    docker.image('whackerS/dvwa-custom:latest').push()
+                    }
+                }
+
+            }
+        }
+
         stage('Deploy Services') {
             steps {
                 script {
