@@ -40,8 +40,6 @@ pipeline {
                 script {
                     // Khởi tạo kết nối SSH
                     sshagent(credentials: ['masterNode']) {
-                        
-                        sh 'ssh -o StrictHostKeyChecking=no whackers@192.168.1.217 "docker network create --driver overlay web-net"'
 
                         // Triển khai dịch vụ MariaDB cho DVWA
                         sh 'ssh -o StrictHostKeyChecking=no whackers@192.168.1.217 "docker service create --name dvwa_db --replicas 1 --network web-net --publish published=3306,target=3306 whackers/dvwa_db:latest"'
